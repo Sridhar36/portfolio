@@ -1,4 +1,5 @@
 import csv
+import requests
 
 from flask import Flask, render_template, request, redirect
 
@@ -52,9 +53,17 @@ def submit_form():
     # When user submits the form, we can grab the data using below code
     if request.method == 'POST':
         try:
-            data = request.form.to_dict()
-            write_to_csv(data)
-            print(data)
+            webdata = request.form.to_dict()
+            write_to_csv(webdata)
+            # {'email': 'sridhar6261@gmail.com', 'subject': 'Hi', 'message': 'hello'}
+            requests.post("https://ntfy.sh/sri_alerts_rvsk",
+                          data=r"MAIL from %s with SUBJECT %s ;CONTENT: %s" % (
+                              webdata['email'], webdata['subject'], webdata['message']),
+                          headers={
+                              "Title": "new contact request from %s" % webdata['email'],
+                              "Tags": "loudspeaker"
+                          })
+            print(webdata)
             return redirect('/thankyou.html')
         except Exception as err:
             return "did not return to database", err
